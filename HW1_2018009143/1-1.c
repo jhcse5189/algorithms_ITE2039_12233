@@ -42,7 +42,7 @@ void build_heap(int* a, int n) {
 
   int idx = n / 2;
   for ( idx; idx > 0; --idx)
-  max_heapify(a, idx, n);
+    max_heapify(a, idx, n);
 }
 
 
