@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 void heap_sort(int* a, int n);
 void build_heap(int* a, int n);
@@ -10,14 +11,21 @@ int right_child(int idx);
 
 int main() {
 
-  int i = 1;
+  int d, i;
+  int* arr;
 
-  int arr[] = {0, 4, 1, 3, 2, 16, 9, 10, 14, 8, 7};
-  int n = sizeof(arr) / sizeof(arr[0]) - 1;
+  for ( i = 0; scanf("%d", &d); ++i ) {
+    if (d == -1) {
+      break;
+    } else {
+      arr[i] = d;
+    }
+  }
 
+  int n = i;
   heap_sort(arr, n);
 
-  for ( ; i <= n; ++i )
+  for ( i = 0; i < n; ++i )
     printf("%d ", arr[i]);
   printf("\n");
 

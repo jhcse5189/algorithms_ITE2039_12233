@@ -49,24 +49,11 @@ int main(int argc, char* argv[]) {
   }
   fclose(f);
 
-  //int* res = (int*)malloc(n * sizeof(int));
   int* res = heap_k_sort(arrs, k, n);
 
-  printf("seg5.5:\n");
   for ( i = 0; i < n; ++i )
     printf("%d ", *(res + i));
-
-  printf("seg6:\n");
-  // //print.
-  // for ( i = 0; i < k; ++i) {
-  //   for ( j = 1; j < arrs[i][0]; ++j)
-  //     printf("arrs[%d][%d] : %d\t", i, j, arrs[i][j]);
-  //   printf("\n");
-  // }
-  // for ( i = 0; i < k; ++i) {
-  //   free(arrs[n]);
-  // }
-  // free(arrs);
+  printf("\n");
 
   for ( i = 0; i < k; ++i) {
     free(arrs[i]);
@@ -80,7 +67,7 @@ int main(int argc, char* argv[]) {
 
 int* heap_k_sort(int** a, int k, int n) {
 
-  int res[n];
+  int* res = (int*)malloc(n * sizeof(int));
   int i, j;
 
   int** a_copy = (int**)malloc(k * sizeof(int*));
@@ -93,17 +80,16 @@ int* heap_k_sort(int** a, int k, int n) {
       a_copy[i][j] = a[i][j];
   }
 
-  int k_heap[k+1];
-  int k_tag[k+1];
+  int* k_heap = (int*)malloc((k+1) * sizeof(int));
+  int* k_tag = (int*)malloc((k+1) * sizeof(int));
 
-  for ( int i = 1; i < k; ++i ) {
+  for ( i = 1; i <= k; ++i ) {
     k_heap[i] = a_copy[i-1][1];
     k_tag[i] = i-1;
     a_copy[i-1][0] -= 1;
   }
-  build_heap(k_heap, k_tag, k);
 
-  printf("seg3\n");
+  build_heap(k_heap, k_tag, k);
 
   for ( i = 0; i < n; ++i) {
 
@@ -113,22 +99,16 @@ int* heap_k_sort(int** a, int k, int n) {
       k_heap[1] = 1000;
       min_heapify(k_heap, k_tag, 1, k);
     } else {
-      printf("tag?:%d\n", k_tag[1]);
-      printf("a[][0]:%d\n", a[k_tag[1]][0]);
-      printf("a_copy[][0]:%d\n", a_copy[k_tag[1]][0]);
       k_heap[1] = a_copy[k_tag[1]][a[k_tag[1]][0]-a_copy[k_tag[1]][0]+1];
+      a_copy[k_tag[1]][0] -= 1;
       min_heapify(k_heap, k_tag, 1, k);
     }
   }
-
-  printf("seg4\n");
 
   for ( i = 0; i < k; ++i) {
     free(a_copy[i]);
   }
   free(a_copy);
-
-  printf("seg5\n");
 
   return res;
 }
