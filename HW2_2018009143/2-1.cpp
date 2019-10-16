@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
     std::srand(std::time(NULL));
 
     clock_t start, end;
-    double d;
+    float delay;
 
     int i, j;
     int* eltArr = new int[MAX_INPUT_SIZE];
@@ -34,36 +34,33 @@ int main(int argc, char* argv[]) {
 
     // read File
     std::ifstream inf(inpath);
-    
+
     // TODO: why eof is issued?
     if (inf) {
         for (i = 0; !inf.eof(); i++)
             inf >> eltArr[i];
     }
     std::cout << "i: " << i << std::endl;
-    
+
 
 
     start = clock();
-    std::cout << "ready?... press the enter...\n";
-    std::cin.ignore();
     hybrid_quick_sort(eltArr, 1, i - 1);
-
     end = clock();
-    //delay = (double)(end - start) / CLOCKS_PER_SEC;
+    delay = (float)(end - start) / CLOCKS_PER_SEC;
     std::cout << start << " " << end << std::endl;
-    printf("%lf\n", (double)(end - start) / CLOCKS_PER_SEC);
+    printf("%lf\n", delay);
 
     // write File
     std::ofstream output("output2-1.txt");
-    
+
     if (output.is_open()) {
 
         for (j = 0; j < i; j++)
             output << eltArr[j] << " ";
-        output << "\n" << (double)(end - start) / CLOCKS_PER_SEC << " s" << "\n";
+        output << "\n" << std::fixed << delay << " s" << "\n";
     }
-    
+
     delete[] eltArr;
     return 0;
 }
@@ -74,7 +71,7 @@ void hybrid_quick_sort(int* a, int p, int r) {
     int q;
     if (r + 1 <= 10) {
         insertion_sort(a, r + 1);
-    } 
+    }
 
     else {
 
@@ -87,7 +84,7 @@ void hybrid_quick_sort(int* a, int p, int r) {
 }
 
 int partition(int* a, int p, int r) {
-    
+
     int i, j, tmp;
     int pivot = median_of_3(a, p ,r);
 
@@ -115,7 +112,7 @@ int partition(int* a, int p, int r) {
 int median_of_3(int* a, int p, int r) {
 
 /*
-    
+
     int rand_idx = std::rand() % 10;
     std::cout << "Random value on [0, " << MAX_INPUT_SIZE << "]: "
              << rand_idx << '\n';
