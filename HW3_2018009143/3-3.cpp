@@ -15,10 +15,12 @@
 #define FORWARD 2
 #define CROSS 3
 
-/* global variable for timestamps */
+/* global variable for timestamps & check whether given is DAG */
 int tick;
+int isDag = 1;
+std::list<int>* tsort;
 
-/* Depth-First Search */
+/* Depth-First Search (For. topological sort) */
 class Graph {
 
 /* Vertex struct */
@@ -27,6 +29,7 @@ struct Vertex {
     int color;
     int d;
     int f;
+    int isStacked;
 };
 
     int V;
@@ -49,10 +52,14 @@ Graph::Graph(int v) {
     for (int i = 1; i <= v; i++) {
         nodes[i].n = i;
         nodes[i].color = WHITE;
+        nodes[i].isStacked = 0;
     }
 
     // start time from 0
     tick = 0;
+
+    // 
+    tsort = new std::list<int>[v + 1];
 }
 
 void Graph::DFS() {
@@ -75,14 +82,11 @@ void Graph::DFS_VISIT(int u) {
     std::list<int>::iterator v;
     for (v = adj[u].begin(); v != adj[u].end(); v++) {
         if (nodes[*v].color == WHITE) {
-            std::cout << "(" << u << ", " << *v << ") tree edge" << std::endl;
+            /* tree edge */
             DFS_VISIT(*v);
-        } else if (nodes[*v].color == BLACK && u != 1) {
-            std::cout << "(" << u << ", " << *v << ") cross edge" << std::endl;
         } else if (u >= *v && abs(*v - u) != 1) {
-            std::cout << "(" << u << ", " << *v << ") back edge" << std::endl;
-        } else if (u < *v && abs(*v - u) > 1) {
-            std::cout << "(" << u << ", " << *v << ") forward edge" << std::endl;
+            //std::cout << "(" << u << ", " << *v << ") back edge" << std::endl;
+            isDag = 0;
         }
     }
 
@@ -90,34 +94,29 @@ void Graph::DFS_VISIT(int u) {
     nodes[u].color = BLACK;
     tick++;
     nodes[u].f = tick;
+
+    // Push node to stack
+    //Push(u);
+    
+    if (nodes[u].isStacked == 0) {
+        //std::cout << "push " << u << std::endl;
+        tsort->push_front(u);
+        nodes[u].isStacked = 1;
+    }
 }
 
 void Graph::PrintResult(int v) {
 
-    int i, j, key;
-    Graph::Vertex node;
-    Graph::Vertex* tmp = new Graph::Vertex[v + 1];
-    tmp = nodes;
-
-    /* insertion sort */
-    for (j = 2; j <= v; j++) {
-        
-        node = tmp[j];
-        key = tmp[j].d;
-        i = j - 1;
-        while (tmp[i].d > key && i >= 1) {
-            tmp[i + 1] = tmp[i];
-            i--;
-        }
-        tmp[i + 1] = node;
+    std::cout << isDag << std::endl;
+    if (isDag == 0) {
+        return;
     }
 
-    for (i = 1; i <= v; i++) {
-        std::cout << tmp[i].n << " ";
+    std::list<int>::iterator i;
+    for (i = tsort->begin(); i != tsort->end(); i++) {
+        std::cout << *i << " ";
     }
     std::cout << std::endl;
-    
-    delete[] tmp;
 }
 
 void Graph::MakeAdj(int i, int j) {
@@ -129,7 +128,7 @@ void Graph::MakeAdj(int i, int j) {
 int main(int argc, char* argv[]) {
 
     int v, i, j, input;
-    std::string inpath = "input3-1.txt";
+    std::string inpath = "input3-3.txt";
 
 
     // read data from file I/O

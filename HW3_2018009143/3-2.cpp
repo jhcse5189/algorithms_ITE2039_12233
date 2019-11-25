@@ -1,5 +1,4 @@
 #include <iostream>
-#include <cstdlib>
 #include <fstream>
 #include <string>
 #include <list>
@@ -9,22 +8,17 @@
 #define GRAY 1
 #define BLACK 2
 
-/* classification of edges */
-#define TREE 0
-#define BACK 1
-#define FORWARD 2
-#define CROSS 3
-
 /* global variable for timestamps */
 int tick;
 
-/* Depth-First Search */
+/* Depth-First Search (Undirected) */
 class Graph {
 
 /* Vertex struct */
 struct Vertex {
     int n;
     int color;
+    int component;
     int d;
     int f;
 };
@@ -37,6 +31,7 @@ public:
     void DFS();
     void DFS_VISIT(int u);
     void PrintResult(int v);
+    void PrintComponents(int v);
     void MakeAdj(int i, int j);
 };
 
@@ -45,7 +40,6 @@ Graph::Graph(int v) {
     nodes = new Graph::Vertex[v + 1];
     adj = new std::list<int>[v + 1];
 
-    // initialize all vertices from graph
     for (int i = 1; i <= v; i++) {
         nodes[i].n = i;
         nodes[i].color = WHITE;
@@ -56,37 +50,33 @@ Graph::Graph(int v) {
 }
 
 void Graph::DFS() {
-    // if V == WHITE -> DFS_VISIT(G, u);
-    for (int i = 1; i <= V; i++) {
+
+    int i, j;
+    for (i = 1, j = 1; i <= V; i++) {
         if (nodes[i].color == WHITE) {
+            nodes[i].component = j;
             DFS_VISIT(i);
+            j++;
         }
     }
 }
 
 void Graph::DFS_VISIT(int u) {
 
-    // WHITE vertex u has just been discovered
+    //std::cout << "(" << u << ")" << std::endl;
     tick++;
     nodes[u].d = tick;
     nodes[u].color = GRAY;
 
-    // explore edge (u, v)
     std::list<int>::iterator v;
     for (v = adj[u].begin(); v != adj[u].end(); v++) {
         if (nodes[*v].color == WHITE) {
-            std::cout << "(" << u << ", " << *v << ") tree edge" << std::endl;
+            nodes[*v].component = nodes[u].component;
+            //std::cout << u << "&" << *v << " share the component " << nodes[u].component << std::endl;
             DFS_VISIT(*v);
-        } else if (nodes[*v].color == BLACK && u != 1) {
-            std::cout << "(" << u << ", " << *v << ") cross edge" << std::endl;
-        } else if (u >= *v && abs(*v - u) != 1) {
-            std::cout << "(" << u << ", " << *v << ") back edge" << std::endl;
-        } else if (u < *v && abs(*v - u) > 1) {
-            std::cout << "(" << u << ", " << *v << ") forward edge" << std::endl;
         }
     }
 
-    // blacken u; it is finished
     nodes[u].color = BLACK;
     tick++;
     nodes[u].f = tick;
@@ -97,11 +87,15 @@ void Graph::PrintResult(int v) {
     int i, j, key;
     Graph::Vertex node;
     Graph::Vertex* tmp = new Graph::Vertex[v + 1];
-    tmp = nodes;
 
-    /* insertion sort */
+    for (i = 1; i <= v; i++) {
+        tmp[i].n = nodes[i].n;
+        tmp[i].d = nodes[i].d;
+    }
+    //tmp = nodes;
+
     for (j = 2; j <= v; j++) {
-        
+
         node = tmp[j];
         key = tmp[j].d;
         i = j - 1;
@@ -116,8 +110,16 @@ void Graph::PrintResult(int v) {
         std::cout << tmp[i].n << " ";
     }
     std::cout << std::endl;
-    
+
     delete[] tmp;
+}
+
+void Graph::PrintComponents(int v) {
+
+    int i;
+    for (i = 1; i <= v; i++) {
+        std::cout << i << ": " << nodes[i].component << std::endl;
+    }
 }
 
 void Graph::MakeAdj(int i, int j) {
@@ -128,9 +130,8 @@ void Graph::MakeAdj(int i, int j) {
 
 int main(int argc, char* argv[]) {
 
-    int v, i, j, input;
-    std::string inpath = "input3-1.txt";
-
+    int v, i, j, count, input;
+    std::string inpath = "input3-2.txt";
 
     // read data from file I/O
     std::fstream inf(inpath);
@@ -142,9 +143,12 @@ int main(int argc, char* argv[]) {
 
     for (i = 1; i <= v; i++) {
         j = 1;
+        count = 0;
         while (j <= v && inf >> input) {
-            if (input == 1) {
+            count++;
+            if (count > i && input == 1) {
                 g.MakeAdj(i, j);
+                //std::cout << "(" << i << ", " << j << ")" << std::endl;
             }
             j++;
         }
@@ -155,6 +159,8 @@ int main(int argc, char* argv[]) {
 
     // Print DFS result
     g.PrintResult(v);
+
+    g.PrintComponents(v);
 
     return 0;
 }
